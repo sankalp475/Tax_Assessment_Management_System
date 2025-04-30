@@ -117,6 +117,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             height: 100%;
             margin: 0;
             padding: 0;
+            overflow-x: hidden;
         }
         
         body {
@@ -124,13 +125,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             align-items: center;
             justify-content: center;
             background-color: #f8f9fc;
-            padding: 20px;
+            padding: 1rem;
+            min-height: 100vh;
         }
         
         .container {
             width: 100%;
             max-width: 900px;
             margin: 0 auto;
+            padding: 0 1rem;
         }
         
         .card {
@@ -139,28 +142,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
             overflow: hidden;
             width: 100%;
+            max-width: 900px;
         }
         
         .card-header {
             background-color: var(--primary-color);
             color: white;
             text-align: center;
-            padding: 2rem;
+            padding: 1.5rem;
             border-bottom: none;
         }
         
         .card-header h1 {
-            font-size: 2rem;
-            margin-bottom: 0;
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
         }
         
         .card-body {
-            padding: 2rem;
+            padding: 1.5rem;
         }
         
         .nav-tabs {
             border-bottom: none;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
         }
         
         .nav-tabs .nav-item {
@@ -192,7 +196,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
         }
         
         .form-control:focus {
@@ -204,7 +208,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             background: url('https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1050&q=80');
             background-size: cover;
             background-position: center;
-            min-height: 500px;
+            min-height: 400px;
         }
         
         .tab-content {
@@ -221,11 +225,56 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
             
             .card {
-                margin: 0 auto;
+                margin: 0;
+                border-radius: 0;
             }
             
+            .card-header {
+                padding: 1rem;
+            }
+            
+            .card-header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+            
+            .form-group {
+                margin-bottom: 0.75rem;
+            }
+            
+            .input-group {
+                margin-bottom: 0.5rem;
+            }
+            
+            .form-check {
+                margin-bottom: 0.5rem;
+            }
+            
+            .btn {
+                width: 100%;
+                margin-top: 1rem;
+            }
+        }
+        
+        @media (max-width: 575.98px) {
             body {
-                padding: 10px;
+                padding: 0;
+            }
+            
+            .container {
+                padding: 0;
+            }
+            
+            .card-header h1 {
+                font-size: 1.25rem;
+            }
+            
+            .nav-tabs .nav-link {
+                padding: 0.5rem;
+                font-size: 0.9rem;
             }
         }
     </style>

@@ -10,20 +10,22 @@ class Database {
     private $conn;
     
     /**
-     * Database constructor - uses PostgreSQL
+     * Database constructor - uses MariaDB
      */
     private function __construct() {
-        // Use environment variables for PostgreSQL
-        $host = getenv('PGHOST');
-        $port = getenv('PGPORT');
-        $dbname = getenv('PGDATABASE');
-        $user = getenv('PGUSER');
-        $password = getenv('PGPASSWORD');
+        $host = 'localhost';
+        $dbname = 'tax_db';
+        $user = 'root';
+        $password = '';
         
         try {
-            $dsn = "pgsql:host=$host;port=$port;dbname=$dbname";
-            $this->conn = new PDO($dsn, $user, $password);
-            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $dsn = "mysql:host=$host;dbname=$dbname;charset=utf8mb4";
+            $options = [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false,
+            ];
+            $this->conn = new PDO($dsn, $user, $password, $options);
             
             // Create tables if they don't exist
             $this->createTables();
