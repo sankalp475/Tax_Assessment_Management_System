@@ -1,14 +1,6 @@
-<?php
-session_start();
-
-// Check if the user is logged in, if not redirect to the login page
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit;
-}
-
-$pageTitle = "Dashboard - Tax Assessment Management System";
-$activePage = "dashboard";
+<?php session_start(); 
+// Config for database connection
+require_once 'config/database.php';
 ?>
 
 <!DOCTYPE html>

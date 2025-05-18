@@ -16,7 +16,7 @@ class Database {
         $host = 'localhost';
         $dbname = 'tax_db';
         $user = 'root';
-        $password = '';
+        $password = ''; // In production, set this to a secure password and use environment variables
         
         try {
             $dsn = "mysql:host=$host;dbname=$dbname;charset=utf8mb4";
@@ -31,321 +31,21 @@ class Database {
             $this->createTables();
             
         } catch(PDOException $e) {
-            echo "Connection failed: " . $e->getMessage();
-            die();
+            // In production, log the error instead of displaying it
+            error_log("Database connection failed: " . $e->getMessage());
+            die("A database error occurred. Please contact support.");
         }
     }
     
     /**
-     * Creates DB tables if they don't exist
-     */
-    private function createTables() {
-        // Check if users table exists
-        $stmt = $this->conn->prepare("SELECT EXISTS (
-            SELECT FROM information_schema.tables 
-            WHERE table_schema = 'public' 
-            AND table_name = 'users'
-        )");
-        $stmt->execute();
-        $usersTableExists = $stmt->fetchColumn();
-        
-        if (!$usersTableExists) {
-            // Create users table
-            $this->conn->exec("CREATE TABLE users (
-                id SERIAL PRIMARY KEY,
-                username VARCHAR(50) NOT NULL UNIQUE,
-                password VARCHAR(255) NOT NULL,
-                fullname VARCHAR(100) NOT NULL,
-                email VARCHAR(100) NOT NULL,
-                role VARCHAR(20) NOT NULL DEFAULT 'user',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )");
-            
-            // Insert user accounts
-            $this->insertUserAccounts();
-        }
-        
-        // Check if clients table exists
-        $stmt = $this->conn->prepare("SELECT EXISTS (
-            SELECT FROM information_schema.tables 
-            WHERE table_schema = 'public' 
-            AND table_name = 'clients'
-        )");
-        $stmt->execute();
-        $tableExists = $stmt->fetchColumn();
-        
-        if (!$tableExists) {
-            // Create clients table
-            $this->conn->exec("CREATE TABLE clients (
-                id SERIAL PRIMARY KEY,
-                name VARCHAR(255) NOT NULL,
-                pan VARCHAR(10) NOT NULL,
-                client_type VARCHAR(50) NOT NULL,
-                email VARCHAR(255),
-                phone VARCHAR(20),
-                address TEXT,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )");
-            
-            // Create tax_returns table
-            $this->conn->exec("CREATE TABLE tax_returns (
-                id SERIAL PRIMARY KEY,
-                client_id INTEGER REFERENCES clients(id),
-                assessment_year VARCHAR(10) NOT NULL,
-                return_type VARCHAR(10) NOT NULL,
-                filing_date DATE NOT NULL,
-                total_income DECIMAL(12,2) NOT NULL,
-                tax_payable DECIMAL(12,2) NOT NULL,
-                is_revised BOOLEAN DEFAULT false,
-                original_return_id INTEGER,
-                acknowledgement_no VARCHAR(20),
-                filing_type VARCHAR(50),
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )");
-            
-            // Create trading_accounts table
-            $this->conn->exec("CREATE TABLE trading_accounts (
-                id SERIAL PRIMARY KEY,
-                client_id INTEGER REFERENCES clients(id),
-                fiscal_year VARCHAR(10) NOT NULL,
-                opening_stock DECIMAL(12,2) DEFAULT 0,
-                purchases DECIMAL(12,2) DEFAULT 0,
-                direct_expenses DECIMAL(12,2) DEFAULT 0,
-                closing_stock DECIMAL(12,2) DEFAULT 0,
-                gross_profit DECIMAL(12,2) DEFAULT 0,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )");
-            
-            // Create profit_loss_accounts table
-            $this->conn->exec("CREATE TABLE profit_loss_accounts (
-                id SERIAL PRIMARY KEY,
-                client_id INTEGER REFERENCES clients(id),
-                fiscal_year VARCHAR(10) NOT NULL,
-                gross_profit DECIMAL(12,2) DEFAULT 0,
-                other_income DECIMAL(12,2) DEFAULT 0,
-                admin_expenses DECIMAL(12,2) DEFAULT 0,
-                selling_expenses DECIMAL(12,2) DEFAULT 0,
-                financial_expenses DECIMAL(12,2) DEFAULT 0,
-                depreciation DECIMAL(12,2) DEFAULT 0,
-                net_profit DECIMAL(12,2) DEFAULT 0,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )");
-            
-            // Create balance_sheets table
-            $this->conn->exec("CREATE TABLE balance_sheets (
-                id SERIAL PRIMARY KEY,
-                client_id INTEGER REFERENCES clients(id),
-                fiscal_year VARCHAR(10) NOT NULL,
-                capital DECIMAL(12,2) DEFAULT 0,
-                reserves DECIMAL(12,2) DEFAULT 0,
-                long_term_liabilities DECIMAL(12,2) DEFAULT 0,
-                current_liabilities DECIMAL(12,2) DEFAULT 0,
-                fixed_assets DECIMAL(12,2) DEFAULT 0,
-                investments DECIMAL(12,2) DEFAULT 0,
-                current_assets DECIMAL(12,2) DEFAULT 0,
-                misc_expenses DECIMAL(12,2) DEFAULT 0,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )");
-            
-            // Create activity_logs table
-            $this->conn->exec("CREATE TABLE activity_logs (
-                id SERIAL PRIMARY KEY,
-                client_id INTEGER REFERENCES clients(id),
-                activity_type VARCHAR(50) NOT NULL,
-                activity_description TEXT NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )");
-            
-            // Insert sample data
-            $this->insertSampleData();
-        }
-    }
-    
-    /**
-     * Insert user accounts into the users table
-     */
-    private function insertUserAccounts() {
-        // Hash passwords - In a real app, use a stronger password hashing algorithm
-        $passwordHash = password_hash('password123', PASSWORD_DEFAULT);
-        
-        // Sample user accounts - 2 normal users and 3 admin users
-        $users = [
-            // Regular users
-            ['user1', $passwordHash, 'John Smith', 'john@example.com', 'user'],
-            ['user2', $passwordHash, 'Jane Doe', 'jane@example.com', 'user'],
-            
-            // Admin users
-            ['admin1', $passwordHash, 'Admin User 1', 'admin1@example.com', 'admin'],
-            ['admin2', $passwordHash, 'Admin User 2', 'admin2@example.com', 'admin'],
-            ['admin3', $passwordHash, 'Admin User 3', 'admin3@example.com', 'admin'],
-        ];
-        
-        $stmt = $this->conn->prepare("INSERT INTO users (username, password, fullname, email, role) VALUES (?, ?, ?, ?, ?)");
-        
-        foreach($users as $user) {
-            $stmt->execute($user);
-        }
-        
-        echo "User accounts created successfully.<br>";
-    }
-    
-    /**
-     * Insert sample data into the tables
-     */
-    private function insertSampleData() {
-        // Sample clients
-        $clients = [
-            ['Rahul Patel', 'ABCDE1234F', 'individual', 'rahul@example.com', '9876543210', 'Mumbai, Maharashtra'],
-            ['Priya Sharma', 'FGHIJ5678K', 'individual', 'priya@example.com', '9876543211', 'Delhi, NCR'],
-            ['Sharma Enterprises', 'KLMNO9012P', 'partnership', 'sharma@example.com', '9876543212', 'Bangalore, Karnataka'],
-            ['Global Trading Co.', 'QRSTU3456V', 'company', 'global@example.com', '9876543213', 'Chennai, Tamil Nadu'],
-            ['Kumar Industries', 'WXYZ7890A', 'company', 'kumar@example.com', '9876543214', 'Kolkata, West Bengal'],
-            ['Singh Family Trust', 'BCDEF1234G', 'trust', 'singh@example.com', '9876543215', 'Hyderabad, Telangana']
-        ];
-        
-        $clientIds = [];
-        
-        $stmt = $this->conn->prepare("INSERT INTO clients (name, pan, client_type, email, phone, address) VALUES (?, ?, ?, ?, ?, ?)");
-        
-        foreach($clients as $client) {
-            $stmt->execute($client);
-            $clientIds[] = $this->conn->lastInsertId();
-        }
-        
-        // Sample tax returns
-        $returns = [
-            // Client 1 returns
-            [$clientIds[0], '2023-2024', 'ITR-1', '2023-07-31', 850000, 45000, false, null, '12345678901', 'E-filing'],
-            [$clientIds[0], '2022-2023', 'ITR-1', '2022-07-29', 780000, 38000, false, null, '12345678902', 'E-filing'],
-            [$clientIds[0], '2021-2022', 'ITR-1', '2021-07-31', 720000, 32000, false, null, '12345678903', 'E-filing'],
-            
-            // Client 2 returns
-            [$clientIds[1], '2023-2024', 'ITR-1', '2023-07-25', 920000, 52000, false, null, '12345678904', 'E-filing'],
-            [$clientIds[1], '2022-2023', 'ITR-1', '2022-07-28', 850000, 45000, true, null, '12345678905', 'E-filing'],
-            // Revised return for Client 2, 2022-2023
-            [$clientIds[1], '2022-2023', 'ITR-1', '2022-09-15', 890000, 48000, true, 5, '12345678906', 'E-filing'],
-            
-            // Client 3 returns
-            [$clientIds[2], '2023-2024', 'ITR-5', '2023-07-20', 4500000, 850000, false, null, '12345678907', 'E-filing'],
-            [$clientIds[2], '2022-2023', 'ITR-5', '2022-07-22', 4200000, 780000, false, null, '12345678908', 'E-filing'],
-            
-            // Client 4 returns
-            [$clientIds[3], '2023-2024', 'ITR-6', '2023-07-15', 7800000, 1950000, false, null, '12345678909', 'E-filing'],
-            
-            // Client 5 returns
-            [$clientIds[4], '2023-2024', 'ITR-6', '2023-07-10', 8500000, 2125000, false, null, '12345678910', 'E-filing'],
-            
-            // Client 6 returns
-            [$clientIds[5], '2023-2024', 'ITR-7', '2023-07-05', 5000000, 400000, false, null, '12345678911', 'E-filing'],
-        ];
-        
-        $stmt = $this->conn->prepare("INSERT INTO tax_returns 
-            (client_id, assessment_year, return_type, filing_date, total_income, tax_payable, is_revised, original_return_id, acknowledgement_no, filing_type) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        
-        foreach($returns as $return) {
-            $stmt->execute($return);
-        }
-        
-        // Sample trading accounts
-        $tradingAccounts = [
-            // Client 3 - Sharma Enterprises
-            [$clientIds[2], '2023-2024', 150000, 3200000, 350000, 180000, 880000],
-            [$clientIds[2], '2022-2023', 120000, 2800000, 320000, 150000, 710000],
-            
-            // Client 4 - Global Trading Co.
-            [$clientIds[3], '2023-2024', 450000, 5600000, 750000, 520000, 2120000],
-            
-            // Client 5 - Kumar Industries
-            [$clientIds[4], '2023-2024', 380000, 6200000, 820000, 450000, 2350000],
-        ];
-        
-        $stmt = $this->conn->prepare("INSERT INTO trading_accounts 
-            (client_id, fiscal_year, opening_stock, purchases, direct_expenses, closing_stock, gross_profit) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)");
-        
-        foreach($tradingAccounts as $tradingAccount) {
-            $stmt->execute($tradingAccount);
-        }
-        
-        // Sample profit & loss accounts
-        $profitLossAccounts = [
-            // Client 3 - Sharma Enterprises
-            [$clientIds[2], '2023-2024', 880000, 120000, 350000, 180000, 120000, 80000, 270000],
-            [$clientIds[2], '2022-2023', 710000, 90000, 310000, 150000, 100000, 70000, 170000],
-            
-            // Client 4 - Global Trading Co.
-            [$clientIds[3], '2023-2024', 2120000, 320000, 650000, 450000, 320000, 220000, 800000],
-            
-            // Client 5 - Kumar Industries
-            [$clientIds[4], '2023-2024', 2350000, 350000, 720000, 480000, 350000, 250000, 900000],
-        ];
-        
-        $stmt = $this->conn->prepare("INSERT INTO profit_loss_accounts 
-            (client_id, fiscal_year, gross_profit, other_income, admin_expenses, selling_expenses, financial_expenses, depreciation, net_profit) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        
-        foreach($profitLossAccounts as $profitLossAccount) {
-            $stmt->execute($profitLossAccount);
-        }
-        
-        // Sample balance sheets
-        $balanceSheets = [
-            // Client 3 - Sharma Enterprises
-            [$clientIds[2], '2023-2024', 2500000, 270000, 1200000, 850000, 3000000, 500000, 1250000, 70000],
-            [$clientIds[2], '2022-2023', 2300000, 170000, 1100000, 780000, 2800000, 450000, 1050000, 50000],
-            
-            // Client 4 - Global Trading Co.
-            [$clientIds[3], '2023-2024', 5000000, 800000, 3500000, 2100000, 8000000, 1200000, 2150000, 50000],
-            
-            // Client 5 - Kumar Industries
-            [$clientIds[4], '2023-2024', 6000000, 900000, 4200000, 2500000, 9500000, 1500000, 2550000, 50000],
-        ];
-        
-        $stmt = $this->conn->prepare("INSERT INTO balance_sheets 
-            (client_id, fiscal_year, capital, reserves, long_term_liabilities, current_liabilities, fixed_assets, investments, current_assets, misc_expenses) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        
-        foreach($balanceSheets as $balanceSheet) {
-            $stmt->execute($balanceSheet);
-        }
-        
-        // Sample activity logs
-        $activityLogs = [
-            [$clientIds[0], 'Return Filed', 'Filed ITR-1 for assessment year 2023-2024'],
-            [$clientIds[1], 'Client Updated', 'Updated contact information'],
-            [$clientIds[2], 'Trading Account', 'Added trading account for FY 2023-2024'],
-            [$clientIds[3], 'Balance Sheet', 'Created balance sheet for FY 2023-2024'],
-            [$clientIds[4], 'Return Filed', 'Filed ITR-6 for assessment year 2023-2024'],
-            [$clientIds[5], 'Client Added', 'New trust client added'],
-            [$clientIds[1], 'Revised Return', 'Filed revised return for AY 2022-2023'],
-        ];
-        
-        $stmt = $this->conn->prepare("INSERT INTO activity_logs 
-            (client_id, activity_type, activity_description) 
-            VALUES (?, ?, ?)");
-        
-        foreach($activityLogs as $activityLog) {
-            $stmt->execute($activityLog);
-        }
-    }
-    
-    /**
-     * Get singleton instance
+     * Get the database instance
      * 
      * @return Database
      */
     public static function getInstance() {
-        if (self::$instance == null) {
-            self::$instance = new Database();
+        if (self::$instance === null) {
+            self::$instance = new self();
         }
-        
         return self::$instance;
     }
     
@@ -359,9 +59,195 @@ class Database {
     }
     
     /**
-     * Close the database connection
+     * Create database tables if they don't exist
      */
-    public function closeConnection() {
-        $this->conn = null;
+    private function createTables() {
+        $queries = [
+            // Client Master Record
+            "CREATE TABLE IF NOT EXISTS clients (
+                pan VARCHAR(10) PRIMARY KEY,
+                name VARCHAR(30) NOT NULL,
+                fathers_name VARCHAR(30),
+                dob DATE,
+                address VARCHAR(40),
+                telephone VARCHAR(12),
+                sex VARCHAR(6),  -- 'male', 'female', or 'other'
+                category TINYINT UNSIGNED,  -- 0: INDV, 1: HUF, 2: FIRM, 3: AOP, 4: LA
+                residence_status TINYINT UNSIGNED,  -- 0: RESIDENT, 1: NR, 2: NOR
+                ward_circle VARCHAR(20)
+            )",
+            
+            // Income Tax Records
+            "CREATE TABLE IF NOT EXISTS income_tax_records (
+                pan VARCHAR(10),
+                ass_year_1 DATE,
+                ass_year_2 DATE,
+                prev_income DECIMAL(15,2),
+                return_type BOOLEAN,  -- 0: original, 1: revised
+                income_salary DECIMAL(15,2),
+                income_house DECIMAL(15,2),
+                income_business DECIMAL(15,2),
+                short_term_gain DECIMAL(15,2),
+                long_term_gain DECIMAL(15,2),
+                capital_gains DECIMAL(15,2),
+                other_income DECIMAL(15,2),
+                added_income DECIMAL(15,2),
+                gross_income DECIMAL(15,2),
+                deductions_via DECIMAL(15,2),
+                total_income DECIMAL(15,2),
+                agr_income DECIMAL(15,2),
+                exempt_income DECIMAL(15,2),
+                normal_income DECIMAL(15,2),
+                normal_tax DECIMAL(15,2),
+                special_income DECIMAL(15,2),
+                special_tax DECIMAL(15,2),
+                tax_on_total DECIMAL(15,2),
+                rebate DECIMAL(15,2),
+                tax_payable DECIMAL(15,2),
+                surcharge DECIMAL(15,2),
+                total_tax_payable DECIMAL(15,2),
+                relief DECIMAL(15,2),
+                net_tax_payable DECIMAL(15,2),
+                tan_source DECIMAL(15,2),
+                advance_tax_paid DECIMAL(15,2),
+                interest_payable DECIMAL(15,2),
+                assessment_paid_1 DECIMAL(15,2),
+                assessment_paid_2 DECIMAL(15,2),
+                total_assessment_paid DECIMAL(15,2),
+                bsr_code VARCHAR(15),
+                deposit_date DATE,
+                challan_serial VARCHAR(10),
+                amount DECIMAL(15,2),
+                bank_name VARCHAR(20),
+                balance_refund DECIMAL(15,2),
+                balance_tax DECIMAL(15,2),
+                enc1 VARCHAR(20),
+                enc2 VARCHAR(20),
+                enc3 VARCHAR(20),
+                enc4 VARCHAR(20),
+                enc5 VARCHAR(20),
+                enc6 VARCHAR(20),
+                PRIMARY KEY (pan, ass_year_1, ass_year_2),
+                FOREIGN KEY (pan) REFERENCES clients(pan) ON DELETE CASCADE
+            )",
+            
+            // Trading Account
+            "CREATE TABLE IF NOT EXISTS trading_accounts (
+                pan VARCHAR(10),
+                ass_year_1 DATE,
+                ass_year_2 DATE,
+                opening_stock DECIMAL(15,2),
+                purchases DECIMAL(15,2),
+                carriage DECIMAL(15,2),
+                octroi DECIMAL(15,2),
+                customs_duty DECIMAL(15,2),
+                wages DECIMAL(15,2),
+                coal_water_gas DECIMAL(15,2),
+                power_heating DECIMAL(15,2),
+                manufacturing_costs DECIMAL(15,2),
+                consumable_supplies DECIMAL(15,2),
+                factory_expenses DECIMAL(15,2),
+                royalty DECIMAL(15,2),
+                gross_profit DECIMAL(15,2),
+                sales DECIMAL(15,2),
+                closing_stock DECIMAL(15,2),
+                gross_loss DECIMAL(15,2),
+                PRIMARY KEY (pan, ass_year_1, ass_year_2),
+                FOREIGN KEY (pan) REFERENCES clients(pan) ON DELETE CASCADE
+            )",
+            
+            // Profit & Loss Account
+            "CREATE TABLE IF NOT EXISTS pl_accounts (
+                pan VARCHAR(10),
+                ass_year_1 DATE,
+                ass_year_2 DATE,
+                gross_loss DECIMAL(15,2),
+                salaries_wages DECIMAL(15,2),
+                office_godown_rent DECIMAL(15,2),
+                office_expenses DECIMAL(15,2),
+                miscellaneous_expenses DECIMAL(15,2),
+                insurance DECIMAL(15,2),
+                stationery DECIMAL(15,2),
+                staff_welfare DECIMAL(15,2),
+                lighting_water DECIMAL(15,2),
+                establishment_expenses DECIMAL(15,2),
+                postage_telegram DECIMAL(15,2),
+                law_charges DECIMAL(15,2),
+                repairs DECIMAL(15,2),
+                distribution_expenses DECIMAL(15,2),
+                traveling DECIMAL(15,2),
+                general_expenses DECIMAL(15,2),
+                stable_expenses DECIMAL(15,2),
+                selling_expenses DECIMAL(15,2),
+                carriage_outward DECIMAL(15,2),
+                carriage_sales DECIMAL(15,2),
+                indirect_wages DECIMAL(15,2),
+                audit_fees DECIMAL(15,2),
+                entertainment DECIMAL(15,2),
+                interest_paid DECIMAL(15,2),
+                discount_allowed DECIMAL(15,2),
+                bad_debts DECIMAL(15,2),
+                bad_debts_reserve DECIMAL(15,2),
+                depreciation DECIMAL(15,2),
+                interest_capital DECIMAL(15,2),
+                discount_charges DECIMAL(15,2),
+                bank_charges DECIMAL(15,2),
+                export_charges DECIMAL(15,2),
+                trade_expenses DECIMAL(15,2),
+                administration DECIMAL(15,2),
+                financial_expenses DECIMAL(15,2),
+                commission DECIMAL(15,2),
+                advertisement DECIMAL(15,2),
+                charity DECIMAL(15,2),
+                sample_expenses DECIMAL(15,2),
+                license_fee DECIMAL(15,2),
+                delivery_charges DECIMAL(15,2),
+                brokerage DECIMAL(15,2),
+                sales_tax DECIMAL(15,2),
+                loss_assets DECIMAL(15,2),
+                loss_fire_theft DECIMAL(15,2),
+                net_profit DECIMAL(15,2),
+                PRIMARY KEY (pan, ass_year_1, ass_year_2),
+                FOREIGN KEY (pan) REFERENCES clients(pan) ON DELETE CASCADE
+            )",
+            
+            // Balance Sheet
+            "CREATE TABLE IF NOT EXISTS balance_sheets (
+                pan VARCHAR(10),
+                ass_year_1 DATE,
+                ass_year_2 DATE,
+                bills_payable DECIMAL(15,2),
+                creditors DECIMAL(15,2),
+                loans DECIMAL(15,2),
+                expenses_outstanding DECIMAL(15,2),
+                capital DECIMAL(15,2),
+                net_profit DECIMAL(15,2),
+                interest_capital DECIMAL(15,2),
+                drawings DECIMAL(15,2),
+                net_loss DECIMAL(15,2),
+                income_tax DECIMAL(15,2),
+                cash_hand DECIMAL(15,2),
+                cash_bank DECIMAL(15,2),
+                investments DECIMAL(15,2),
+                bills_receivable DECIMAL(15,2),
+                debtors DECIMAL(15,2),
+                stock_closing DECIMAL(15,2),
+                stores DECIMAL(15,2),
+                plant_machinery DECIMAL(15,2),
+                freehold_premises DECIMAL(15,2),
+                unexpired_expenses DECIMAL(15,2),
+                goodwill DECIMAL(15,2),
+                PRIMARY KEY (pan, ass_year_1, ass_year_2),
+                FOREIGN KEY (pan) REFERENCES clients(pan) ON DELETE CASCADE
+            )"
+        ];
+        
+        foreach ($queries as $query) {
+            try {
+                $this->conn->exec($query);
+            } catch (PDOException $e) {
+                error_log("Table creation failed: " . $e->getMessage());
+            }
+        }
     }
 }
