@@ -1,4 +1,4 @@
-# Views Documentation
+# Views 
 
 ## Overview
 Views in the Tax Assessment Management System are responsible for presenting data to users in a structured and user-friendly manner. The system uses PHP templates with Bootstrap for styling and responsive design.

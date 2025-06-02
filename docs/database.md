@@ -1,4 +1,4 @@
-# Database Documentation
+# Database 
 
 ## Overview
 The Tax Assessment Management System uses MySQL as its database management system. The database is designed to store and manage tax-related information, client details, and various financial records.

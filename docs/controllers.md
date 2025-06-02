@@ -1,4 +1,4 @@
-# Controllers Documentation
+# Controllers 
 
 ## Overview
 Controllers in the Tax Assessment Management System handle the business logic and coordinate between models and views. They process incoming requests, interact with the database through models, and render appropriate views.

@@ -17,7 +17,7 @@ TAX_ASSESSMENT_MANAGEMENT_SYSTEM/
 ├── database/       # Database scripts and migrations
 ├── routes/         # Route definitions
 ├── logs/          # Application logs
-└── docs/          # Documentation
+└── docs/          # 
 ```
 
 ##  Index
