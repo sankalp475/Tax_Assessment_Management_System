@@ -1,4 +1,4 @@
-# Tax Assessment Management System Documentation
+# Tax Assessment Management System 
 
 ## Overview
 The Tax Assessment Management System is a comprehensive web application designed to manage tax returns, client information, trading accounts, profit & loss accounts, and balance sheets. The system provides a user-friendly interface for tax professionals to manage their clients' tax-related information efficiently.
@@ -20,13 +20,13 @@ TAX_ASSESSMENT_MANAGEMENT_SYSTEM/
 └── docs/          # Documentation
 ```
 
-## Documentation Index
+##  Index
 
 ### Core Components
-- [Controllers Documentation](controllers.md)
-- [Models Documentation](models.md)
-- [Views Documentation](views.md)
-- [Database Documentation](database.md)
+- [Controllers ](controllers.md)
+- [Models ](models.md)
+- [Views ](views.md)
+- [Database ](database.md)
 
 ### Features
 - [Tax Return Management](features/tax-returns.md)
@@ -36,8 +36,8 @@ TAX_ASSESSMENT_MANAGEMENT_SYSTEM/
 - [Balance Sheets](features/balance-sheets.md)
 - [Reporting System](features/reports.md)
 
-### Technical Documentation
-- [API Documentation](api.md)
+### Technical 
+- [API ](api.md)
 - [Database Schema](database-schema.md)
 - [Security Guidelines](security.md)
 - [Deployment Guide](deployment.md)
