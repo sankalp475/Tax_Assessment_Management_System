@@ -1,0 +1,25 @@
+RewriteEngine On
+RewriteBase /
+
+# If the request is not for a file
+RewriteCond %{REQUEST_FILENAME} !-f
+# If the request is not for a directory
+RewriteCond %{REQUEST_FILENAME} !-d
+# Rewrite all requests to index.php
+RewriteRule ^(.*)$ index.php [QSA,L]
+
+# Prevent directory listing
+Options -Indexes
+
+# Set default character set
+AddDefaultCharset UTF-8
+
+# Enable CORS
+Header set Access-Control-Allow-Origin "*"
+
+# Add a custom header to test if .htaccess is being processed by Apache
+Header set X-Test-Header "htaccess-active"
+
+# PHP error display
+php_flag display_errors on
+php_value error_reporting E_ALL

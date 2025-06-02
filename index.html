@@ -1,0 +1,118 @@
+            <!-- Main Content -->
+            <div class="col-md-10 main-content">
+                <div class="container">
+                    <h2 class="mb-4">Create New Tax Return</h2>
+                    
+                    <form id="taxReturnForm" class="needs-validation" novalidate>
+                        <!-- Basic Information Section -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">Basic Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="taxYear" class="form-label">Tax Year</label>
+                                        <select class="form-select" id="taxYear" required>
+                                            <option value="">Select Tax Year</option>
+                                            <option value="2023-2024">2023-2024</option>
+                                            <option value="2022-2023">2022-2023</option>
+                                            <option value="2021-2022">2021-2022</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="clientId" class="form-label">Client</label>
+                                        <select class="form-select" id="clientId" required>
+                                            <option value="">Select Client</option>
+                                            <!-- Client options will be populated dynamically -->
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Income Section -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">Income Details</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="employmentIncome" class="form-label">Employment Income</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">£</span>
+                                            <input type="number" class="form-control" id="employmentIncome" step="0.01" min="0">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="selfEmploymentIncome" class="form-label">Self-Employment Income</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">£</span>
+                                            <input type="number" class="form-control" id="selfEmploymentIncome" step="0.01" min="0">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="rentalIncome" class="form-label">Rental Income</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">£</span>
+                                            <input type="number" class="form-control" id="rentalIncome" step="0.01" min="0">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="investmentIncome" class="form-label">Investment Income</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">£</span>
+                                            <input type="number" class="form-control" id="investmentIncome" step="0.01" min="0">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Deductions Section -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">Deductions</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="pensionContributions" class="form-label">Pension Contributions</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">£</span>
+                                            <input type="number" class="form-control" id="pensionContributions" step="0.01" min="0">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="charitableDonations" class="form-label">Charitable Donations</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">£</span>
+                                            <input type="number" class="form-control" id="charitableDonations" step="0.01" min="0">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Information -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">Additional Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="notes" class="form-label">Notes</label>
+                                    <textarea class="form-control" id="notes" rows="3"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-secondary" onclick="window.history.back()">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save Tax Return</button>
+                        </div>
+                    </form>
+                </div>
+            </div> 
